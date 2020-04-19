@@ -1,0 +1,90 @@
+*{
+	margin: 0;
+	padding: 0;
+}
+.main{
+	width: 1000px;
+	margin-top: 20px;
+	margin-left: 50px;
+}
+.main .container .select,
+.main .container .select .el-input--suffix,
+.main .container .select .el-input__inner{
+	width: 80px;
+	height: 25px;
+}
+.main .container .select .el-input__inner{
+	border: none;
+}
+.main .container .select{
+	border: 1px rgb(169,169,169) solid;
+	margin-right: 10px;
+}
+.main .container .select .el-input--suffix .el-input__icon{
+	line-height: 25px;
+	color: #000;
+}
+.container .startDate,
+.container .endDate{
+	height: 23px;
+	width: 117px;
+}
+.container .search{
+	width:35%;
+	margin-left: 30px;
+}
+.container .searchBtn{
+	background-color: rgb(3,184,204);
+	margin-left: -5px;
+}
+.main .container .addGood{
+	background-color: rgb(3,184,204);
+	margin-left: 25px;
+}
+.container .title{
+	width: 100%;
+	height: 50px;
+	margin-top: 20px;
+	line-height: 50px;
+}
+.container .title span{
+	display: block;
+	float: left;
+	width: 80px;
+}
+.container .title span:nth-of-type(2),
+.container .title span:nth-of-type(3){
+	width: 150px;
+}
+.container .title span:nth-of-type(7){
+	width: 200px;
+}
+.container .goods{
+	width: 100%;
+	height:60px; 
+	border: 1px rgb(192,196,204) solid;
+	line-height: 60px;
+	border-radius: 10px;
+}
+.container .goods div{
+	float: left;
+	width: 80px;
+}
+.container .goods div:nth-of-type(2),
+.container .goods div:nth-of-type(3){
+	width: 150px;
+}
+.container .goods div:nth-of-type(7){
+	width: 200px;
+}
+.container .goods .change,
+.container .goods .delete{
+	background-color: rgb(3,184,204);
+	border-radius: 10px;
+}
+.el-dialog__wrapper {
+	top:-40px !important;
+}
+
+
+

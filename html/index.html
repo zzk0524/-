@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>首页</title>
+	<link rel="stylesheet" type="text/css" href="../css/index.css">
+	<link rel="stylesheet" href="../font-awesome-4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="../css/element-ui.css">
+	<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+	<script type="text/javascript" src="../js/jquery-3.3.1.min.js"></script>
+	<script type="text/javascript" src="../js/vue.min.js"></script>
+	<script src="../js/element-ui.js"></script>
+</head>
+<body>
+	<div class="header" id="app">
+		<div class="logo">超市进销管理系统</div>
+		<div class="profile" id="profile">
+			<a class="profile__item profile__user" id="profileUser"><span>{{users.account}}</span><i class="fa fa-user"></i></a>
+			<a class="profile__item profile__phone"><i class="fa fa-phone"></i></a>
+			<a class="profile__item profile__gear"><i class="fa fa-gear"></i></a>
+			<a class="profile__item profile__bell"><i class="fa fa-bell"></i></a>
+		</div>
+		<div class="userExit" id="userExit">
+			<a class="backUp" id="backUp" @click="backUp">备份数据</a>
+			<a class="exit" id="exit" href="login.html">退出登录</a>
+		</div>
+	</div>
+	<div class="container">
+		<div class="userWrap">
+	        <ul class="userMenu">
+	            <li class="list current"><a href="marketing.html" target="menuFrame">营销记录</a></li>
+	            <li class="list"><a href="details.html" target="menuFrame">商品详情</a></li>
+	            <li class="list"><a href="goods.html" target="menuFrame">货物进出</a></li>
+	            <li class="list"><a href="setting.html" target="menuFrame">信息设置</a></li>
+	        </ul>
+	    </div>
+	    <div id="content" class="content">
+	    	<div class="smallTitle" id="smallTitle">营销记录</div>
+	    	<iframe scrolling="yes" src="marketing.html" frameborder="0" name="menuFrame" style="width: 1107px;height: 570px;"></iframe>
+	    </div>
+	</div>
+	<script type="text/javascript">
+		new Vue({
+			el:'#app',
+			data(){
+				return {
+					users:[]
+				}
+			},
+			methods:{
+				backUp(){
+					_this = this;
+					$.ajax({//备份数据
+					 	url:"http://127.0.0.1/goods/backup",    //请求的url地址
+					    dataType:"json",   //返回格式为json
+					    async:true,//请求是否异步，默认为异步，这也是ajax重要特性
+					    contentType:'application/json',
+					    type:"get",   //请求方式
+						success:function(data){
+							if(data.success){
+								_this.$message({message:data.message,type: 'success'});
+								
+							}else{
+								_this.$message({message:data.message,type: 'error'});
+							}
+						}	
+					});
+				},
+				loadName(){
+					//接收来自登录页面的用户信息
+					let user = JSON.parse(sessionStorage.getItem("user"));
+					this.users=user;
+				}
+			},
+			mounted(){
+				this.loadName();
+			}
+		});
+	</script>
+	<script type="text/javascript" src="../js/index.js"></script>
+</body>
+</html>

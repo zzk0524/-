@@ -1,0 +1,190 @@
+*{
+	margin: 0;
+	padding: 0;
+}
+html{
+	height:100%;
+}
+body{
+	width: 100%;
+	height:100%;
+	background-color: rgb(233,236,243);
+}
+a{
+	text-decoration: none;
+}
+/*主页头部*/
+.header{
+	height: 44px;
+	width: 100%;
+	background-color: rgb(3,184,204);
+	position: relative;
+}
+/*左上角的标题文字*/
+.logo{
+	float: left;
+	color: #fff;
+	font-family:"华文行楷";
+	font-size: 27px; 
+	margin-top: 7px;
+	margin-left: 30px;
+}
+/*右上角的图标区域*/
+.profile{
+	float: right;
+}
+/*每一个图标占有空间*/
+.header .profile .profile__item {
+  display: block;
+  position: relative;
+  float: left;
+  width: 60px;
+  height: 44px;
+  text-decoration: none;
+}
+/*每个图标区域鼠标经过变色*/
+.header .profile .profile__item:hover{
+	background-color: #0099FF;
+	cursor: pointer;
+}
+/*图标里的图案*/
+.header .profile .profile__item .fa {
+  position: absolute;
+  left: 21px;
+  top: 12px;
+}
+/*用户图标的占有空间*/
+.header .profile .profile__user{
+	width: 120px;
+	line-height: 44px;
+}
+/*用户名*/
+.header .profile .profile__user span{
+	margin-left: 21px;
+	color: #fff;
+
+}
+/*用户图标图案的定位*/
+.header .profile .profile__user .fa{
+  left: 81px;
+  top: 12px;
+}
+/*每个图标图案的颜色和大小*/
+.fa-user:before,
+.fa-phone:before,
+.fa-gear:before,
+.fa-bell:before{
+	color: #fff;
+	font-size: 20px;
+}
+/*用户退出登录的区域*/
+.userExit{
+	position: absolute;
+	width: 120px;
+	height: 90px;
+	top: 44px;
+	right: 180px;
+	z-index: 2;
+	background-color: rgb(0,153,255);
+	display: none;
+	border-radius:0px 0px 10px 10px;
+}
+/*退出登录按钮*/
+.userExit .exit{
+	display: block;
+	border: 1px #fff solid;
+	width: 80px;
+	height: 30px;
+	color: #fff;
+	font-size: 15px;
+	margin-top: 9px;
+	margin-left: 19px;
+	text-align: center;
+	line-height: 30px;
+	cursor: pointer;
+	transition: 1s;
+}
+.userExit .exit:hover,
+.userExit .backUp:hover{
+	border-radius: 13px;
+	transition: 1s;
+}
+/*备份按钮*/
+.userExit .backUp{
+	display: block;
+	border: 1px #fff solid;
+	width: 80px;
+	height: 30px;
+	color: #fff;
+	font-size: 15px;
+	margin-top: 9px;
+	margin-left: 19px;
+	text-align: center;
+	line-height: 30px;
+	cursor: pointer;
+	transition: 1s;
+}
+/*网页身体部分*/
+.container{
+	width: 100%;
+	height: 90%;
+	background-color: rgb(233,236,243);
+}
+/*左侧选项栏*/
+.userWrap{
+	float: left;
+	width: 15%;
+	height: 90%;
+	background-color: #fff;
+	margin-top: 20px;
+	margin-left: 40px;
+}
+/*左侧选项栏*/
+.container .userWrap .userMenu{
+	list-style-type: none;
+	margin-top: 20px;
+}
+/*左侧选项栏每一个选项*/
+.container .userWrap .userMenu li{
+	height: 30px;
+	line-height: 30px;
+	padding-left: 50px;
+}
+/*左侧选项栏文字颜色为白色*/
+.container .userWrap .userMenu li>a{
+	color: #000;
+	display:block;
+	width:230px;
+}
+/*左侧选项栏鼠标经过时背景色*/
+.container .userWrap .userMenu li:hover{
+	background-color: rgb(0,153,255);
+}
+/*左侧选项栏鼠标经过时文字颜色*/
+.container .userWrap .userMenu li:hover>a,
+.container .userWrap .userMenu .current>a{
+	color: #fff;
+}
+/*当前选中*/
+.current{
+	background-color: rgb(3,184,204);
+	color: #fff;
+}
+/*右侧加载页面的内容*/
+.content{
+	position: relative;
+	float: left;
+	height: 86.5%;
+	width: 77%;
+	background-color: #fff;
+	margin-top: 45px;
+	margin-left: 20px;
+}
+/*右侧左上角的小标题*/
+.smallTitle{
+	position: absolute;
+	width: 100px;
+	height: 20px;
+	font-size: 12px;
+	top: -25px;
+}

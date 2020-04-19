@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>商品详情</title>
+	<link rel="stylesheet" type="text/css" href="../css/details.css">
+	<link rel="stylesheet" href="../css/element-ui.css">
+	<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+	<script type="text/javascript" src="../js/jquery-3.3.1.min.js"></script>
+	<script type="text/javascript" src="../js/vue.min.js"></script>
+    <script src="../js/element-ui.js"></script>
+</head>
+<body>
+	<div class="main">
+		<div class="container">
+			<button @click="searchAll" class="searchAll">查看全部</button>
+			<el-input v-model="sel" class="search"></el-input>
+			<el-button class="searchBtn" type="primary" @click="search">搜索</el-button>
+			<el-button class="addGood" type="primary" @click="addgood">增加商品信息</el-button>
+			<div class="title">
+				<span>编号</span>
+				<span>名称</span>
+				<span>类别</span>
+				<span>进价</span>
+				<span>单价</span>
+				<span>数量</span>
+			</div>
+			<div class="goods" v-for="(good,index) in goods">
+				<div>{{good.goodsid}}</div>
+				<div>{{good.goodsname}}</div>
+				<div>{{good.goodssort}}</div>
+				<div>{{good.inprice}}</div>
+				<div>{{good.unitprice}}</div>
+				<div>{{good.number}}</div>
+				<div><el-button class="change" type="primary" @click="change(good)">修改</el-button></div>
+				<div><el-button class="delete" type="primary" @click="del(good)">删除</el-button></div>
+			</div>
+			<el-dialog title="增加商品信息" :visible.sync="add" width="60%">
+				<div style="margin-left: 10%; width: 100%;">
+					<el-form label-width="20%" style="width: 100%;">
+						<el-form-item label="商品编号：">
+							<el-input v-model="form.goodsid" style="width:50%" />
+						</el-form-item>
+						<el-form-item label="商品名称：">
+							<el-input v-model="form.goodsname" style="width:50%" />
+						</el-form-item>
+						<!-- <el-form-item label="商品类别：">
+							<el-input v-model="form.goodssort" style="width:50%" />
+						</el-form-item> -->
+						<el-form-item label="商品类别：">
+							<template>
+								<el-select v-model="value" placeholder="请选择">
+								  	<el-option v-for="item in options" :key="item.value" :label="item.name" :value="item.name">
+								  	</el-option>
+								</el-select>
+							</template>
+						</el-form-item>
+						<el-form-item label="商品进价：">
+							<el-input v-model="form.inprice" style="width:50%" />
+						</el-form-item>
+						<el-form-item label="商品单价：">
+							<el-input v-model="form.unitprice" style="width:50%" />
+						</el-form-item>
+					</el-form>
+				</div>
+				<span slot="footer">
+					<el-button @click="add = false">取 消</el-button>
+					<el-button type="primary" @click="addsure">确 定</el-button>
+			 	</span>
+			</el-dialog>
+			<el-dialog title="修改商品信息" :visible.sync="update" width="60%">
+				<div style="margin-left: 10%; width: 100%;">
+					<el-form label-width="20%" style="width: 100%;">
+						<el-form-item label="商品编号：">
+							<el-input v-model="form.goodsid" style="width:50%" />
+						</el-form-item>
+						<el-form-item label="商品名称：">
+							<el-input v-model="form.goodsname" style="width:50%" />
+						</el-form-item>
+						<!-- <el-form-item label="商品类别：">
+							<el-input v-model="form.goodssort" style="width:50%" />
+						</el-form-item> -->
+						<el-form-item label="商品类别：">
+							<template>
+								<el-select v-model="value" placeholder="请选择">
+								  	<el-option v-for="item in options" :key="item.value" :label="item.name" :value="item.name">
+								  	</el-option>
+								</el-select>
+							</template>
+						</el-form-item>
+						<el-form-item label="商品进价：">
+							<el-input v-model="form.inprice" style="width:50%" />
+						</el-form-item>
+						<el-form-item label="商品单价：">
+							<el-input v-model="form.unitprice" style="width:50%" />
+						</el-form-item>
+					</el-form>
+				</div>
+				<span slot="footer">
+					<el-button @click="update = false">取 消</el-button>
+					<el-button type="primary" @click="updatesure">确 定</el-button>
+			 	</span>
+			</el-dialog>
+		</div>
+	</div>
+	<script type="text/javascript">
+		new Vue({
+			el: '.main',
+			data:function() {
+				return {
+					sel:'',
+					form: {
+						id:'',
+						goodsid:'',
+						goodsname:'',
+						goodssort:'',
+						inprice:'',
+						unitprice:'',
+						number:'',
+						state:''
+					},
+					goods:[],
+					add: false,
+					update:false,
+					value:'',
+					options: [{name:'食品'},{name:'饮品'},{name:'生鲜'},{name:'烟酒'},{name:'百货'},{name:'数码'},{name:'服装'}]
+				}
+			},
+			methods: {
+				addgood() {
+					this.form.goodsid='';
+					this.form.goodsname='';
+					// this.form.goodssort='';
+					this.value='',
+					this.form.inprice='';
+					this.form.unitprice='';
+					this.add = true;
+				},
+				searchAll(){
+					this.getgoods();
+				},
+				del(good) {
+					var _this=this;
+					$.ajax({
+					 	url:"http://127.0.0.1/goods/deleteGoodsById",    //请求的url地址
+					    dataType:"json",   //返回格式为json
+					    async:true,//请求是否异步，默认为异步，这也是ajax重要特性
+					    contentType:'application/json',
+						data:{id:good.id},    //参数值
+					    type:"get",   //请求方式
+						success:function(data){
+							if(data.success){
+								_this.$message({message:data.message,type: 'success'});
+								
+							}else{
+								_this.$message({message:data.message,type: 'error'});
+							}
+							_this.getgoods();
+						}
+							
+					});
+				},
+				change(good) {
+					this.form.id=good.id;
+					this.form.goodsid=good.goodsid;
+					this.form.goodsname=good.goodsname;
+					this.value=good.goodssort;
+					this.form.inprice=good.inprice;
+					this.form.unitprice=good.unitprice;
+					this.update=true;
+				},
+				addsure(){
+					this.add=false;
+					this.form.goodssort=this.value;
+					var _this=this;
+					//console.log(_this.form);
+					$.ajax({
+					 	url:"http://127.0.0.1/goods/addGoods",    //请求的url地址
+					    dataType:"json",   //返回格式为json
+					    async:true,//请求是否异步，默认为异步，这也是ajax重要特性
+						contentType:'application/json',
+					    data:JSON.stringify(_this.form),    //参数值
+					    type:"post",   //请求方式
+						success:function(data){
+							if(data.success){
+								_this.$message({message:data.message,type: 'success'});
+								
+							}else{
+								_this.$message({message:data.message,type: 'error'});
+							}
+							_this.getgoods();
+						}
+							
+					});
+				},
+				updatesure(){
+					this.update=false;
+					this.form.goodssort=this.value;
+					var _this=this;
+					$.ajax({
+					 	url:"http://127.0.0.1/goods/updateGoods",    //请求的url地址
+					    dataType:"json",   //返回格式为json
+					    async:true,//请求是否异步，默认为异步，这也是ajax重要特性
+					    contentType:'application/json',
+						data:JSON.stringify(_this.form),    //参数值
+					    type:"post",   //请求方式
+						success:function(data){
+							if(data.success){
+								_this.$message({message:data.message,type: 'success'});
+								
+							}else{
+								_this.$message({message:data.message,type: 'error'});
+							}
+							_this.getgoods();
+						}
+							
+					});
+				},
+				getgoods(){
+					var _this=this;
+					$.ajax({
+					 	url:"http://127.0.0.1/goods/selectAllGoods",    //请求的url地址
+					    dataType:"json",   //返回格式为json
+					    async:true,//请求是否异步，默认为异步，这也是ajax重要特性   //参数值 
+						type:"get",   //请求方式
+						success:function(data){
+							_this.goods=data.data;
+						}
+							
+					});
+				},
+				search(){
+					var _this=this;
+					$.ajax({
+					 	url:"http://127.0.0.1/goods/selectGoods",    //请求的url地址
+					    dataType:"json",   //返回格式为json
+					    async:true,//请求是否异步，默认为异步，这也是ajax重要特性
+					    data:{goods:_this.sel},    //参数值
+					    type:"get",   //请求方式
+						success:function(data){
+							//console.log(data);
+							_this.goods=data.data;
+						}
+							
+					});
+				}
+			},
+			created(){
+				this.getgoods();
+			}
+		});
+	</script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+﻿<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<!-- 引入样式 -->
+		<link rel="stylesheet" type="text/css" href="../css/element-ui.css">
+		<link rel="stylesheet" type="text/css" href="../css/login.css">
+		<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css"> 
+		<!-- 引入组件库 -->
+		<script type="text/javascript" src="../js/jquery-3.3.1.min.js"></script>
+		<script type="text/javascript" src="../js/vue.min.js"></script>
+		<script src="../js/element-ui.js"></script>
+	</head>
+
+	<body>
+		<div id="app">
+			<div class="logincanvas">
+				<canvas id="myCanvas" width="654" height="600">当前浏览器不支持canvas</canvas>
+			</div>
+			<div class="form-outer">
+				<div class="form-space">
+					<span class="login-text">登录</span>
+					<span class="register-text">注册</span>
+					<el-form class="form-insert" ref="form" :model="form" label-width="80px" :rules="rules">
+						<el-form-item label="用户名" prop="username">
+							<el-input v-model="form.username"></el-input>
+						</el-form-item>
+						<el-form-item label="密码" prop="password">
+							<el-input v-model="form.password" type="password"></el-input>
+						</el-form-item>
+						<el-form-item class="form-last">
+							<el-button type="primary" @click="onSubmit">登录</el-button>
+							<el-button @click="resetForm">重置</el-button>
+						</el-form-item>
+					</el-form>
+				</div>
+			</div>
+		</div>
+		<script>
+			new Vue({
+				el: '#app',
+				data: function() {
+					return {
+						form: {
+							username: '',
+							password: ''
+						},
+						rules: {
+							username: [{
+									required: true,
+									message: '请输入用户名',
+									trigger: 'blur'
+								},
+								{
+									min: 6,
+									max: 10,
+									message: '长度在6-10个字符',
+									trigger: 'blur'
+								}
+							],
+							password: [{
+									required: true,
+									message: '请输入密码',
+									trigger: 'blur'
+								},
+								{
+									min: 6,
+									max: 32,
+									message: '长度在6-32个字符',
+									trigger: 'blur'
+								}
+							]
+						}
+					}
+				},
+				methods: {
+					onSubmit: function() {
+						var _this = this;
+						_this.$refs['form'].validate(function(valid) {
+							if(valid) {
+								$.ajax({
+									url: 'http://127.0.0.1/goods/selectPassword',
+									type: 'get',
+									data: {account:_this.form.username},
+									dataType: 'json',
+									success: function(data) {
+									console.log(data);
+										if(data.success) {
+											if(_this.form.password==data.data.password) {
+												sessionStorage.setItem("user",JSON.stringify(data.data));
+												window.location.href='index.html';
+											} else {
+												_this.$message("密码或账号错误");
+											}
+										} else {
+											_this.$message("服务器错误");
+										}
+									}
+								});
+							}
+						});
+
+					},
+					resetForm: function() {
+						this.form.username = '';
+						this.form.password = '';
+					}
+				}
+			});
+		</script>
+		<script type="text/javascript">
+			//防止页面后退
+			history.pushState(null, null, document.URL);
+			window.addEventListener('popstate', function () {
+			    history.pushState(null, null, document.URL);
+			});
+		</script>
+		<script type="text/javascript" src="../js/login.js"></script>
+	</body>
+
+</html>

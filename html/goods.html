@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>货物进出</title>
+  <link rel="stylesheet" type="text/css" href="../css/goods.css">
+  <link rel="stylesheet" href="../css/element-ui.css">
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <script type="text/javascript" src="../js/jquery-3.3.1.min.js"></script>
+  <script type="text/javascript" src="../js/vue.min.js"></script>
+  <script src="../js/element-ui.js"></script>
+</head>
+<body>
+	<div class="main">
+		<div class="container">
+			<el-select class="select" v-model="value1" placeholder="请选择" @change="select">
+			    <el-option v-for="item in options1" :key="item.value" :label="item.label" :value="item.value"></el-option>
+			</el-select>
+			<input type="date" class="startDate" v-model="startdate"><span> 至 </span><input type="date" class="endDate" v-model="enddate">
+			<el-input v-model="sel" class="search"></el-input>
+			<el-button class="searchBtn" type="primary" @click="search">搜索</el-button>
+			<el-button class="addGood" type="primary" @click="addgood">增加进出货信息</el-button>
+			<div class="title">
+				<span>编号</span>
+				<span>名称</span>
+				<span>类别</span>
+				<span>状态</span>
+				<span>数量</span>
+				<span>总价</span>
+				<span>时间</span>
+			</div>
+			<div class="goods" v-for="(good,index) in goods">
+				<div>{{good.goodsid}}</div>
+				<div>{{good.goodsname}}</div>
+				<div>{{good.goodssort}}</div>
+				<div>{{good.state}}</div>
+				<div>{{good.number}}</div>
+				<div>{{good.price}}</div>
+				<div>{{good.time.substring(0,10)}}</div>
+				<div><el-button class="change" type="primary" @click="change(good)">修改</el-button></div>
+				<div><el-button class="delete" type="primary" @click="del(good)">删除</el-button></div>
+			</div>
+			<el-dialog title="增加进出货信息" :visible.sync="add" width="60%">
+				<div style="margin-left: 10%; width: 100%;">
+					<el-form label-width="20%" style="width: 100%;">
+						<el-form-item label="商品编号：">
+							<el-input @blur="sum(onegoods)" v-model="form.goodsid" style="width:50%" />
+						</el-form-item>
+						<el-form-item label="货物状态：">
+							<template>
+								<el-select @change="selectSum(onegoods)" v-model="value" placeholder="请选择">
+								  	<el-option v-for="item in options" :key="item.value" :label="item.name" :value="item.name">
+								  	</el-option>
+								</el-select>
+							</template>
+						</el-form-item>
+						<el-form-item label="商品数量：">
+							<el-input @blur="sum(onegoods)" v-model="form.number" style="width:50%"/>
+						</el-form-item>
+						<el-form-item label="商品总价：">
+							<el-input v-model="form.price" style="width:50%"/>
+						</el-form-item>
+						<el-form-item label="完成时间：">
+							<el-input v-model="form.time" placeholder="格式：yyyy-mm-dd" style="width:50%"/>
+						</el-form-item>
+					</el-form>
+				</div>
+				<span slot="footer">
+					<el-button @click="add = false">取 消</el-button>
+					<el-button type="primary" @click="addsure">确 定</el-button>
+			 	</span>
+			</el-dialog>
+			<el-dialog title="修改进出货信息" :visible.sync="update" width="60%">
+				<div style="margin-left: 10%; width: 100%;">
+					<el-form label-width="20%" style="width: 100%;">
+						<el-form-item label="商品编号：">
+							<el-input @blur="sum(onegoods)" v-model="form.goodsid" style="width:50%" />
+						</el-form-item>
+						<el-form-item label="货物状态：">
+							<template>
+								<el-select @change="selectSum(onegoods)" v-model="value" placeholder="请选择">
+								  	<el-option v-for="item in options" :key="item.value" :label="item.name" :value="item.name">
+								  	</el-option>
+								</el-select>
+							</template>
+						</el-form-item>
+						<el-form-item label="商品数量：">
+							<el-input @blur="sum(onegoods)" v-model="form.number" style="width:50%" />
+						</el-form-item>
+						<el-form-item label="商品总价：">
+							<el-input v-model="form.price" style="width:50%" />
+						</el-form-item>
+						<el-form-item label="完成时间：">
+							<el-input v-model="form.time" style="width:50%" />
+						</el-form-item>
+					</el-form>
+				</div>
+				<span slot="footer">
+					<el-button @click="update = false">取 消</el-button>
+					<el-button type="primary" @click="updatesure">确 定</el-button>
+			 	</span>
+			</el-dialog>
+		</div>
+	</div>
+	<script type="text/javascript">
+		new Vue({
+			el: '.main',
+			data:function() {
+				return {
+					sel:'',
+					startdate:'',
+					enddate:'',
+					form: {
+						id:'',
+						goodsid:'',
+						state:'',
+						number:'',
+						price:'',
+						time:''
+					},
+					goods:[],
+					goods1:[],
+					goods2:[],
+					goods3:[],
+					onegoods:[],
+					add: false,
+					update:false,
+					options: [{name:'进货'},{name:'出货'}],
+					options1: [{value: '全部',label: '全部'},{value: '进货',label: '进货'}, {value: '出货',label: '出货'}],
+			        value: '',
+			        value1:'全部'
+				}
+			},
+			methods: {
+				addgood() {
+					this.form.goodsid='';
+					this.value='';
+					this.form.number='';
+					this.form.price='';
+					this.form.time='';
+					this.add = true;
+				},
+				sum(onegoods){
+					// console.log(onegoods);
+					for(var i=0;i<onegoods.length;i++){
+						if(onegoods[i].goodsid==this.form.goodsid&&this.value=="进货"){
+							this.form.price=this.form.number*onegoods[i].inprice;
+							return;
+						}else if(onegoods[i].goodsid==this.form.goodsid&&this.value=="出货"){
+							this.form.price=this.form.number*onegoods[i].unitprice;
+							return;
+						}
+					}
+				},
+				selectSum(onegoods){
+					for(var i=0;i<onegoods.length;i++){
+						if(onegoods[i].goodsid==this.form.goodsid&&this.value=="进货"){
+							this.form.price=this.form.number*onegoods[i].inprice;
+							return;
+						}else if(onegoods[i].goodsid==this.form.goodsid&&this.value=="出货"){
+							this.form.price=this.form.number*onegoods[i].unitprice;
+							return;
+						}
+					}
+				},
+				del(good) {
+					this.form.id=good.id;
+					var _this=this;
+					$.ajax({
+					 	url:"http://127.0.0.1/goods/deleteList",    //请求的url地址
+					    dataType:"json",   //返回格式为json
+					    async:true,//请求是否异步，默认为异步，这也是ajax重要特性
+					    contentType:'application/json',
+						data:JSON.stringify(_this.form),    //参数值
+					    type:"post",   //请求方式
+						success:function(data){
+							if(data.success){
+								_this.$message({message:data.message,type: 'success'});
+								
+							}else{
+								_this.$message({message:data.message,type: 'error'});
+							}
+							_this.getgoods();
+						}
+							
+					});
+				},
+				change(good) {
+					this.form.id=good.id;
+					this.form.goodsid=good.goodsid;
+					this.value=good.state;
+					this.form.number=good.number;
+					this.form.price=good.price;
+					this.form.time=good.time.substring(0,10);
+					this.update=true;
+				},
+				addsure(){
+					this.add=false;
+					this.form.state=this.value;
+					var _this=this;
+					console.log(_this.form);
+					$.ajax({
+					 	url:"http://127.0.0.1/goods/addList",    //请求的url地址
+					    dataType:"json",   //返回格式为json
+					    async:true,//请求是否异步，默认为异步，这也是ajax重要特性
+						contentType:'application/json',
+					    data:JSON.stringify(_this.form),    //参数值
+					    type:"post",   //请求方式
+						success:function(data){
+							if(data.success){
+								_this.$message({message:data.message,type: 'success'});
+								
+							}else{
+								_this.$message({message:data.message,type: 'error'});
+							}
+							_this.getgoods();
+						}
+							
+					});
+				},
+				updatesure(){
+					this.update=false;
+					this.form.state=this.value;
+					var _this=this;
+					$.ajax({
+					 	url:"http://127.0.0.1/goods/updateList",    //请求的url地址
+					    dataType:"json",   //返回格式为json
+					    async:true,//请求是否异步，默认为异步，这也是ajax重要特性
+					    contentType:'application/json',
+						data:JSON.stringify(_this.form),    //参数值
+					    type:"post",   //请求方式
+						success:function(data){
+							if(data.success){
+								_this.$message({message:data.message,type: 'success'});
+								
+							}else{
+								_this.$message({message:data.message,type: 'error'});
+							}
+							_this.getgoods();
+						}
+							
+					});
+				},
+				getgoods(){
+					this.value1="全部";
+					var _this=this;
+					$.ajax({
+					 	url:"http://127.0.0.1/goods/selectAllGoods",    //请求的url地址
+					    dataType:"json",   //返回格式为json
+					    async:true,//请求是否异步，默认为异步，这也是ajax重要特性   //参数值 
+						type:"get",   //请求方式
+						success:function(data){
+							_this.onegoods=data.data;
+						}	
+					});
+					$.ajax({
+					 	url:"http://127.0.0.1/goods/selectAllList",    //请求的url地址
+					    dataType:"json",   //返回格式为json
+					    async:true,//请求是否异步，默认为异步，这也是ajax重要特性   //参数值 
+						type:"get",   //请求方式
+						success:function(data){
+							_this.goods1=null;
+							_this.goods=null;
+							_this.goods1=data.data;
+							_this.goods=_this.goods1;
+						}	
+					});
+				},
+				select(){
+					var _this=this;	
+					if(_this.value1=="进货"){
+						_this.goods=null;
+						_this.goods2=[];
+						for(var i in _this.goods1){
+							if(_this.goods1[i].state=="进货"){
+								_this.goods2.push(_this.goods1[i]);
+							}
+						}
+						_this.goods=_this.goods2;
+
+					}else if(_this.value1=="出货"){
+						_this.goods=null;
+						_this.goods3=[];
+						for(var i in _this.goods1){
+							if(_this.goods1[i].state=="出货"){
+								_this.goods3.push(_this.goods1[i]);
+							}
+						}
+						_this.goods=_this.goods3;
+					}else{
+						_this.goods=null;
+						_this.goods=_this.goods1;
+					}
+					
+				},
+				search(){
+					var _this=this;	
+					_this.value1="全部";
+					for(var i in _this.startdate){
+						if(i=="-"){
+							i="/";
+						}
+					}
+					var arry = {goods:_this.sel,frontTime:_this.startdate,endTime:_this.enddate};
+					console.log(arry);
+					$.ajax({
+					 	url:"http://127.0.0.1/goods/selectList",    //请求的url地址
+					    dataType:"json",   //返回格式为json
+					    async:true,//请求是否异步，默认为异步，这也是ajax重要特性
+					    data:arry,    //参数值
+					    type:"get",   //请求方式
+						success:function(data){
+							_this.goods1=null;
+							_this.goods=null;
+							_this.goods1=data.data;
+							_this.goods=_this.goods1;
+							//console.log(_this.goods);
+						}
+							
+					});
+				}
+			},
+			created(){
+				this.getgoods();
+			}
+		});
+	</script>
+</body>
+</html>

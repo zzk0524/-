@@ -1,0 +1,86 @@
+*{
+	margin: 0;
+	padding: 0;
+}
+.main{
+	width: 1005px;
+	margin-top: 20px;
+	margin-left: 70px;
+}
+.container .searchAll{
+	padding:4px;
+	cursor:pointer;
+	background-color:rgb(3,184,204);
+	border:1px rgb(3,184,204) solid;
+	border-radius:2px;
+	color:#fff;
+}
+.container .searchAll:hover{
+	background-color:rgba(3,184,204,.8);
+}
+.container .search{
+	width:38.5%;
+	margin-left: 80px;
+}
+.container .searchBtn{
+	background-color: rgb(3,184,204);
+	margin-left: -5px;
+}
+.main .container .addGood{
+	background-color: rgb(3,184,204);
+	margin-left: 212px;
+}
+.container .title{
+	width: 100%;
+	height: 50px;
+	margin-top: 20px;
+	line-height: 50px;
+}
+.container .title span{
+	display: block;
+	float: left;
+	width: 120px;
+}
+.container .title span:first-of-type{
+	width: 100px;
+	margin-left:5px;
+}
+.container .title span:nth-of-type(2),
+.container .title span:nth-of-type(3){
+	width: 170px;
+}
+.container .goods{
+	width: 100%;
+	height:60px; 
+	border: 1px rgb(192,196,204) solid;
+	line-height: 60px;
+	border-radius: 10px;
+}
+.container .goods div{
+	float: left;
+	width: 120px;
+}
+.container .goods div:first-of-type,
+.container .goods div:nth-of-type(7),
+.container .goods div:nth-of-type(8){
+	width: 100px;
+}
+.container .goods div:first-of-type{
+	margin-left:5px;
+}
+.container .goods div:nth-of-type(2),
+.container .goods div:nth-of-type(3){
+	width: 170px;
+}
+.container .goods .change,
+.container .goods .delete{
+	background-color: rgb(3,184,204);
+	border-radius: 10px;
+}
+.el-dialog__wrapper {
+	top:-40px !important;
+}
+
+
+
+

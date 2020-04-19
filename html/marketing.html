@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<link rel="stylesheet" type="text/css" href="../css/marketing.css">
+	<link rel="stylesheet" href="../css/element-ui.css">
+	<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+	<script type="text/javascript" src="../js/jquery-3.3.1.min.js"></script>
+	<script type="text/javascript" src="../js/vue.min.js"></script>
+	<script type="text/javascript" src="../js/chart.js"></script>
+	<script src="../js/element-ui.js"></script>
+</head>
+<body>
+	<div class="main">
+		<el-button class="barChart curr" type="primary" id="barChart">进出货总额柱状图</el-button>
+		<el-button class="pieChart" type="primary" @click="pieSelect" id="pieChart">每类商品收益饼状图</el-button>
+		<div class="inAndOut" id="inAndOut">
+			<button class="dayBtn active" id="dayBtn">近七天</button>
+			<button class="monthBtn" id="monthBtn" @click="monthSelect">近六月</button>
+			<div class="inSevenDays" id="inSevenDays">
+				<div class="gross" id="gross">
+					<canvas id="grossChart" style="height:300px;"></canvas>
+				</div>
+				<div class="sale" id="sale">
+					<canvas id="saleChart"></canvas>
+				</div>
+				<div class="grossAndSale" id="grossAndSale">
+					<canvas id="grossAndSaleChart" style="width: 300px;height: 100px;"></canvas>
+				</div>
+				<button class="mergeDay" id="mergeDay" @click="mergeDays">合并两图</button>
+			</div>
+			<div class="inSixMonth" id="inSixMonth">
+				<div class="gross1" id="gross1">
+					<canvas id="grossChart1"></canvas>
+				</div>
+				<div class="sale1" id="sale1">
+					<canvas id="saleChart1"></canvas>
+				</div>
+				<div class="grossAndSale1" id="grossAndSale1">
+					<canvas id="grossAndSaleChart1" style="width: 300px;height: 100px;"></canvas>
+				</div>
+				<button class="mergeMonth" id="mergeMonth" @click="mergeMonth">合并两图</button>
+			</div>
+		</div>
+		<div class="goodsEarnings" id="goodsEarnings">
+			<button class="dayBtn active" id="todayBtn">本日</button>
+			<button class="monthBtn" id="thisMonthBtn" @click="thisMonthSelect">本月</button>
+			<div class="todays" id="todays">
+				<div class="goodsSale" id="goodsSale">
+					<canvas id="goodsSaleChart" style="width: 300px;height: 120px;"></canvas>
+				</div>
+			</div>
+			<div class="thisMonth" id="thisMonth">
+				<div class="goodsSale1" id="goodsSale1">
+					<canvas id="goodsSaleChart1" style="width: 300px;height: 120px;"></canvas>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript" src="../js/marketing.js"></script>
+	<script type="text/javascript">
+		new Vue({
+			el: '.main',
+			data:function() {
+				return {
+					grossMoney:[],//近七日进货
+					saleMoney:[],//近七日销售
+					time:[],//近七日的日期
+					grossMoney1:[],//近六月进货
+					saleMoney1:[],//近六月销售
+					time1:[],//近六月的日期
+					categories:[],//商品类别
+					goodsPriceDay:[],//本日商品收入
+					goodsPriceMonth:[]//本月商品收入
+				}
+			},
+			methods: {
+				getgoods(){
+					var _this=this;
+					$.ajax({//近七日进货
+					 	url:"http://127.0.0.1/goods/sevenDaysInprice",    //请求的url地址
+					    dataType:"json",   //返回格式为json
+					    async:true,//请求是否异步，默认为异步，这也是ajax重要特性   //参数值 
+						type:"get",   //请求方式
+						success:function(data){
+							/*for(var i=0;i<data.data.length;i++){
+								_this.grossMoney[i]=data.data[i];
+								console.log(typeof data.data[i]);
+							}
+							console.log(typeof _this.grossMoney[0]);*/
+							_this.grossMoney=data.data;
+							//console.log(_this.grossMoney);
+							_this.picture();
+						}	
+					});
+					$.ajax({//近七日销售
+					 	url:"http://127.0.0.1/goods/sevenDaysUnitprice",    //请求的url地址
+					    dataType:"json",   //返回格式为json
+					    async:true,//请求是否异步，默认为异步，这也是ajax重要特性   //参数值 
+						type:"get",   //请求方式
+						success:function(data){
+							_this.saleMoney=data.data;
+							//console.log(_this.grossMoney);
+							_this.picture1();
+						}	
+					});
+				},
+				picture(){
+					var _this=this;
+					
+					var myDate;
+					for(var i=6;i>=0;i--){
+						var date = new Date();
+						date.setDate(date.getDate()-i);
+						var month=date.getMonth()+1;
+						if(month<10){
+							month="0"+month;
+						}
+						var day=date.getDate();
+						if(day<10){
+							day="0"+day;
+						}
+						myDate=date.getFullYear()+"-"+month+"-"+day;
+						_this.time.push(myDate);
+					}
+					var myDate1;
+					for(var i=5;i>=0;i--){
+						var date = new Date();
+						date.setMonth(date.getMonth()-i);
+						var month=date.getMonth()+1;
+						if(month<10){
+							month="0"+month;
+						}
+						
+						myDate1=date.getFullYear()+"-"+month;
+						_this.time1.push(myDate1);
+					}
+					
+					var grossCtx = document.getElementById("grossChart");
+					var grossBarChart = new Chart(grossCtx, {
+					    type: 'bar',
+					    data: {
+					    	labels: _this.time,
+					    	datasets: [
+					    		{
+					    			label: '近7天的进货总额',
+					    			backgroundColor: [
+					              		'rgba(255, 99, 132, 0.5)',
+					              		'rgba(54, 162, 235, 0.5)',
+					              		'rgba(255, 206, 86, 0.5)',
+					              		'rgba(75, 192, 192, 0.5)',
+					              		'rgba(153, 102, 255, 0.5)',
+					              		'rgba(255, 159, 64, 0.5)',
+					              		'rgba(74, 229, 27, 0.5)'
+					          		],
+					                borderColor: [
+					                    'rgba(255, 132, 1)',
+					                    'rgba(54, 1235, 1)',
+					                    'rgba(255, 286, 1)',
+					                    'rgba(75, 1192, 1)',
+					                    'rgba(153, 1255, 1)',
+					                    'rgba(255, 164, 1)',
+					                    'rgba(74, 229, 1)'
+					                ],
+					                borderWidth: 1,
+					         		data: _this.grossMoney
+					    		}
+					    	]
+					    },
+					    options: {
+					    	legend:{display:false},
+					    	title:{
+					    		display:true,
+					    		text:'近7天的进货总额'
+					    	},
+					    	scales:{
+					    		yAxes:[
+					    			{
+					    				ticks:{beginAtZero:true}
+									}
+					    		]
+					    	}
+					    }
+					});
+				},
+				picture1(){
+					var saleCtx = document.getElementById("saleChart");
+					var saleBarChart = new Chart(saleCtx, {
+					    type: 'bar',
+					    data: {
+					    	labels: this.time,
+					    	datasets: [
+					    		{
+					    			label: '近7天的销售总额',
+					    			backgroundColor: [
+					              		'rgba(255, 99, 132, 0.5)',
+					              		'rgba(54, 162, 235, 0.5)',
+					              		'rgba(255, 206, 86, 0.5)',
+					              		'rgba(75, 192, 192, 0.5)',
+					              		'rgba(153, 102, 255, 0.5)',
+					              		'rgba(255, 159, 64, 0.5)',
+					              		'rgba(74, 229, 27, 0.5)'
+					          		],
+					                borderColor: [
+					                    'rgba(255, 132, 1)',
+					                    'rgba(54, 1235, 1)',
+					                    'rgba(255, 286, 1)',
+					                    'rgba(75, 1192, 1)',
+					                    'rgba(153, 1255, 1)',
+					                    'rgba(255, 164, 1)',
+					                    'rgba(74, 229, 1)'
+					                ],
+					                borderWidth: 1,
+					         		data: this.saleMoney
+					    		}
+					    	]
+					    },
+					    options: {
+					    	legend:{display:false},
+					    	title:{
+					    		display:true,
+					    		text:'近7天的销售总额'
+					    	},
+					    	scales:{
+					    		yAxes:[
+					    			{
+					    				ticks:{beginAtZero:true}
+									}
+					    		]
+					    	}
+					    }
+					});
+				},
+				pieSelect(){
+					var _this=this;
+					$.ajax({//本日商品收入
+					 	url:"http://127.0.0.1/goods/dayPriceByGoodssort",    //请求的url地址
+					    dataType:"json",   //返回格式为json
+					    async:true,//请求是否异步，默认为异步，这也是ajax重要特性   //参数值 
+						type:"get",   //请求方式
+						success:function(data){
+							console.log(data.data);
+							for(var i=0;i<data.data.length;i++){
+								_this.categories[i]=data.data[i].goodssort
+								_this.goodsPriceDay[i]=data.data[i].price;
+							}	
+							_this.picture4();
+						}	
+					});
+				},
+				mergeDays(){
+					var _this=this;
+					var mergeDay = document.getElementById("mergeDay");
+					if(mergeDay.innerHTML == "合并两图"){
+						var grossAndSaleCtx = document.getElementById("grossAndSaleChart");
+						var grossAndSaleBarChart = new Chart(grossAndSaleCtx, {
+					    	type: 'bar',
+					    	data: {
+					    		labels: _this.time,
+					    		datasets: [
+					    			{
+					    				label: '进货总额',
+					    				backgroundColor: [
+					              		'rgba(255, 99, 132, 0.5)',
+					              		'rgba(255, 99, 132, 0.5)',
+					              		'rgba(255, 99, 132, 0.5)',
+					              		'rgba(255, 99, 132, 0.5)',
+					              		'rgba(255, 99, 132, 0.5)',
+					              		'rgba(255, 99, 132, 0.5)',
+					              		'rgba(255, 99, 132, 0.5)'
+					          		],
+					                borderColor: [
+					                    'rgba(255, 132, 1)',
+					                    'rgba(255, 132, 1)',
+					                    'rgba(255, 132, 1)',
+					                    'rgba(255, 132, 1)',
+					                    'rgba(255, 132, 1)',
+					                    'rgba(255, 132, 1)',
+					                    'rgba(255, 132, 1)'
+					                ],
+					                borderWidth: 1,
+					         		data: _this.grossMoney
+					    			},
+					    			{
+					    				label: '销售总额',
+					    				backgroundColor: [
+					            	  		'rgba(54, 162, 235, 0.5)',
+					            	  		'rgba(54, 162, 235, 0.5)',
+					            	  		'rgba(54, 162, 235, 0.5)',
+					            	  		'rgba(54, 162, 235, 0.5)',
+					            	  		'rgba(54, 162, 235, 0.5)',
+					            	  		'rgba(54, 162, 235, 0.5)',
+					            	  		'rgba(54, 162, 235, 0.5)'
+					          			],
+					            	    borderColor: [
+					            	        'rgba(54, 1235, 1)',
+					            	        'rgba(54, 1235, 1)',
+					            	        'rgba(54, 1235, 1)',
+					            	        'rgba(54, 1235, 1)',
+					            	        'rgba(54, 1235, 1)',
+					            	        'rgba(54, 1235, 1)',
+					            	        'rgba(54, 1235, 1)'
+					            	    ],
+					            	    borderWidth: 1,
+					         			data: _this.saleMoney
+					    			}
+					    		]
+					    	},
+					    	options: {
+					    		title:{
+					    			display:true,
+					    			text:'近7天的进出货总额对比'
+					    		},
+					    		scales:{
+					    			yAxes:[
+					    				{
+					    					ticks:{beginAtZero:true}
+										}
+					    			]
+					    		}
+					    	}
+						});
+					}
+				},
+				mergeMonth(){
+					var _this=this;
+					var mergeMonth = document.getElementById("mergeMonth");
+					if(mergeMonth.innerHTML == "合并两图"){
+						var grossAndSaleCtx1 = document.getElementById("grossAndSaleChart1");
+						var grossAndSaleBarChart1 = new Chart(grossAndSaleCtx1, {
+					    	type: 'bar',
+					    	data: {
+					    		labels: _this.time1,
+					    		datasets: [
+					    			{
+					    				label: '近六个月的进货总额',
+					    				backgroundColor: [
+					              			'rgba(255, 99, 132, 0.5)',
+					              			'rgba(255, 99, 132, 0.5)',
+					              			'rgba(255, 99, 132, 0.5)',
+					              			'rgba(255, 99, 132, 0.5)',
+					              			'rgba(255, 99, 132, 0.5)',
+					              			'rgba(255, 99, 132, 0.5)'
+					          			],
+					                	borderColor: [
+					                	    'rgba(255, 132, 1)',
+					                	    'rgba(255, 132, 1)',
+					                	    'rgba(255, 132, 1)',
+					                	    'rgba(255, 132, 1)',
+					                	    'rgba(255, 132, 1)',
+					                	    'rgba(255, 132, 1)'
+					                	],
+					                	borderWidth: 1,
+					         			data: _this.grossMoney1
+					    			},
+					    			{
+					    				label: '近六个月的销售总额',
+					    				backgroundColor: [
+					              			'rgba(54, 162, 235, 0.5)',
+					              			'rgba(54, 162, 235, 0.5)',
+					              			'rgba(54, 162, 235, 0.5)',
+					              			'rgba(54, 162, 235, 0.5)',
+					              			'rgba(54, 162, 235, 0.5)',
+					              			'rgba(54, 162, 235, 0.5)'
+					          			],
+					                	borderColor: [
+					                	    'rgba(54, 1235, 1)',
+					                	    'rgba(54, 1235, 1)',
+					                	    'rgba(54, 1235, 1)',
+					                	    'rgba(54, 1235, 1)',
+					                	    'rgba(54, 1235, 1)',
+					                	    'rgba(54, 1235, 1)'
+					                	],
+					                	borderWidth: 1,
+					         			data: _this.saleMoney1
+					    			}
+					    		]
+					    	},
+					    	options: {
+					    		title:{
+					    			display:true,
+					    			text:'近六个月的进出货总额对比'
+					    		},
+					    		scales:{
+					    			yAxes:[
+					    				{
+					    					ticks:{beginAtZero:true}
+										}
+					    			]
+					    		}
+					    	}
+						});
+					}
+				},
+				monthSelect(){
+					var _this=this;
+					$.ajax({//近六月进货
+					 	url:"http://127.0.0.1/goods/sixMonthsInprice",    //请求的url地址
+					    dataType:"json",   //返回格式为json
+					    async:true,//请求是否异步，默认为异步，这也是ajax重要特性   //参数值 
+						type:"get",   //请求方式
+						success:function(data){
+							_this.grossMoney1=data.data;
+							_this.picture2();
+						}	
+					});
+					$.ajax({//近六月销售
+					 	url:"http://127.0.0.1/goods/sixMonthsUnitprice",    //请求的url地址
+					    dataType:"json",   //返回格式为json
+					    async:true,//请求是否异步，默认为异步，这也是ajax重要特性   //参数值 
+						type:"get",   //请求方式
+						success:function(data){
+							_this.saleMoney1=data.data;
+							_this.picture3();
+						}	
+					});
+				},
+				picture2(){
+					var grossCtx1 = document.getElementById("grossChart1");
+					var grossBarChart1 = new Chart(grossCtx1, {
+					    type: 'bar',
+					    data: {
+					    	labels: this.time1,
+					    	datasets: [
+					    		{
+					    			label: '近六个月的进货总额',
+					    			backgroundColor: [
+					              		'rgba(255, 99, 132, 0.5)',
+					              		'rgba(54, 162, 235, 0.5)',
+					              		'rgba(255, 206, 86, 0.5)',
+					              		'rgba(75, 192, 192, 0.5)',
+					              		'rgba(153, 102, 255, 0.5)',
+					              		'rgba(74, 229, 27, 0.5)'
+					          		],
+					                borderColor: [
+					                    'rgba(255, 132, 1)',
+					                    'rgba(54, 1235, 1)',
+					                    'rgba(255, 286, 1)',
+					                    'rgba(75, 1192, 1)',
+					                    'rgba(153, 1255, 1)',
+					                    'rgba(74, 229, 1)'
+					                ],
+					                borderWidth: 1,
+					         		data: this.grossMoney1
+					    		}
+					    	]
+					    },
+					    options: {
+					    	legend:{display:false},
+					    	title:{
+					    		display:true,
+					    		text:'近六个月的进货总额'
+					    	},
+					    	scales:{
+					    		yAxes:[
+					    			{
+					    				ticks:{beginAtZero:true}
+									}
+					    		]
+					    	}
+					    }
+					});
+				},
+				picture3(){
+					var saleCtx1 = document.getElementById("saleChart1");
+					var saleBarChart1 = new Chart(saleCtx1, {
+					    type: 'bar',
+					    data: {
+					    	labels: this.time1,
+					    	datasets: [
+					    		{
+					    			label: '近六个月的销售总额',
+					    			backgroundColor: [
+					              		'rgba(255, 99, 132, 0.5)',
+					              		'rgba(54, 162, 235, 0.5)',
+					              		'rgba(255, 206, 86, 0.5)',
+					              		'rgba(75, 192, 192, 0.5)',
+					              		'rgba(153, 102, 255, 0.5)',
+					              		'rgba(74, 229, 27, 0.5)'
+					          		],
+					                borderColor: [
+					                    'rgba(255, 132, 1)',
+					                    'rgba(54, 1235, 1)',
+					                    'rgba(255, 286, 1)',
+					                    'rgba(75, 1192, 1)',
+					                    'rgba(153, 1255, 1)',
+					                    'rgba(74, 229, 1)'
+					                ],
+					                borderWidth: 1,
+					         		data: this.saleMoney1
+					    		}
+					    	]
+					    },
+					    options: {
+					    	legend:{display:false},
+					    	title:{
+					    		display:true,
+					    		text:'近六个月的销售总额'
+					    	},
+					    	scales:{
+					    		yAxes:[
+					    			{
+					    				ticks:{beginAtZero:true}
+									}
+					    		]
+					    	}
+					    }
+					});
+				},
+				picture4(){
+					var goodsSaleCtx = document.getElementById("goodsSaleChart");
+					var goodsSalePieChart = new Chart(goodsSaleCtx, {
+					    type: 'pie',
+					    data: {
+					    	labels: this.categories,
+					    	datasets: [
+					    		{
+					    			backgroundColor: [
+					              		'rgba(255, 99, 132, 0.5)',
+					              		'rgba(54, 162, 235, 0.5)',
+					              		'rgba(255, 206, 86, 0.5)',
+					              		'rgba(153, 102, 255, 0.5)',
+					              		'rgba(255, 159, 64, 0.5)',
+					              		'rgba(74, 229, 27, 0.5)'
+					          		],
+					         		data: this.goodsPriceDay
+					    		}
+					    	]
+					    },
+					    options: {
+					    	title:{
+					    		display:true,
+					    		text:'本日各类商品销售总额   单位/元'
+					    	}
+					    }
+					});
+				},
+				picture5(){
+					var goodsSaleCtx1 = document.getElementById("goodsSaleChart1");
+					var goodsSalePieChart1 = new Chart(goodsSaleCtx1, {
+					    type: 'pie',
+					    data: {
+					    	labels: this.categories,
+					    	datasets: [
+					    		{
+					    			backgroundColor: [
+					              		'rgba(255, 99, 132, 0.5)',
+					              		'rgba(54, 162, 235, 0.5)',
+					              		'rgba(255, 206, 86, 0.5)',
+					              		'rgba(153, 102, 255, 0.5)',
+					              		'rgba(255, 159, 64, 0.5)',
+					              		'rgba(74, 229, 27, 0.5)'
+					          		],
+					         		data: this.goodsPriceMonth
+					    		}
+					    	]
+					    },
+					    options: {
+					    	title:{
+					    		display:true,
+					    		text:'本日各类商品销售总额   单位/元'
+					    	}
+					    }
+					});
+				},
+				thisMonthSelect(){
+					var _this=this;
+					$.ajax({//本月商品收入
+					 	url:"http://127.0.0.1/goods/monthPriceByGoodssort",    //请求的url地址
+					    dataType:"json",   //返回格式为json
+					    async:true,//请求是否异步，默认为异步，这也是ajax重要特性   //参数值 
+						type:"get",   //请求方式
+						success:function(data){
+							for(var i=0;i<data.data.length;i++){
+								_this.categories[i]=data.data[i].goodssort
+								_this.goodsPriceMonth[i]=data.data[i].price;
+							}	
+							_this.picture5();
+						}	
+					});
+				}
+			},
+			// created(){
+			// 	this.getgoods();
+			// },
+			mounted(){
+				this.getgoods();
+			}
+		});
+	</script>
+</body>
+</html>
